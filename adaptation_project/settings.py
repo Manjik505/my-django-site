@@ -121,14 +121,3 @@ LOGOUT_REDIRECT_URL = '/'
 
 # Email backend for testing
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# Создаём админа при запуске (временное решение)
-from django.contrib.auth.models import User
-
-try:
-    if not User.objects.filter(username="admin").exists():
-        User.objects.create_superuser("admin", "admin@example.com", "admin123")
-        print("✅ Админ создан!")
-    else:
-        print("⚠️ Админ уже существует")
-except Exception as e:
-    print(f"Ошибка: {e}")
