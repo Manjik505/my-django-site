@@ -6,8 +6,9 @@ django.setup()
 
 from django.contrib.auth.models import User
 
-if not User.objects.filter(username="admin").exists():
-    User.objects.create_superuser("admin", "admin@example.com", "admin")
-    print("✅ Админ создан")
-else:
-    print("⚠️ Админ уже существует")
+# Удаляем старого, если есть
+User.objects.filter(username="admin").delete()
+
+# Создаём нового
+User.objects.create_superuser("admin", "admin@example.com", "admin123")
+print("✅ Админ создан! Логин: admin, Пароль: admin123")
