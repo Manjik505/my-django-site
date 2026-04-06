@@ -1,0 +1,13 @@
+{% extends 'courses/base.html' %}
+
+{% block content %}
+<div class="theory-card">
+    <h2>📖 {{ course.title }}</h2>
+    <div class="theory-content">
+        {{ course.theory|linebreaks }}
+    </div>
+    <div style="text-align: center;">
+        <a href="/course/{{ course.id }}/test/" class="btn" style="padding: 12px 24px; font-size: 1rem;">▶ Начать тестирование</a>
+    </div>
+</div>
+{% endblock %}

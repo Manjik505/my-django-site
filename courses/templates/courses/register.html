@@ -1,0 +1,58 @@
+{% extends 'courses/base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 450px; margin: 0 auto;">
+    <h2 style="text-align: center; color: #667eea;">📝 Регистрация</h2>
+    
+    <form method="post" style="margin-top: 25px;">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">👤 Имя пользователя</label>
+            <input type="text" name="username" autocomplete="off" class="form-control" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;" placeholder="Введите имя пользователя">
+            <small style="color: #888; font-size: 12px; display: block; margin-top: 5px;">Только буквы, цифры и @/./+/-/_</small>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">🔒 Пароль</label>
+            <input type="password" name="password1" autocomplete="new-password" class="form-control" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;" placeholder="Введите пароль">
+            <small style="color: #888; font-size: 12px; display: block; margin-top: 5px;">Пароль должен содержать минимум 8 символов</small>
+        </div>
+        
+        <div style="margin-bottom: 25px;">
+            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">✅ Подтверждение пароля</label>
+            <input type="password" name="password2" autocomplete="new-password" class="form-control" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;" placeholder="Повторите пароль">
+        </div>
+        
+        {% if form.errors %}
+            <div style="background: #ffebee; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <div style="color: #f44336; margin-bottom: 5px;">⚠️ {{ error|escape }}</div>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <div style="color: #f44336;">⚠️ {{ error|escape }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <button type="submit" class="btn" style="width: 100%; padding: 12px; font-size: 16px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 10px; cursor: pointer;">
+            📝 Зарегистрироваться
+        </button>
+    </form>
+    
+    <p style="text-align: center; margin-top: 20px; color: #666;">
+        Уже есть аккаунт? 
+        <a href="/login/" style="color: #667eea; text-decoration: none; font-weight: 500;">Войти</a>
+    </p>
+</div>
+
+<style>
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+</style>
+{% endblock %}

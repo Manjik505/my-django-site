@@ -1,0 +1,298 @@
+{% extends 'courses/base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 700px; margin: 0 auto;">
+    <h2 style="text-align: center; color: #667eea;">💬 Чат с поддержкой</h2>
+    <p style="text-align: center; color: #666; margin-bottom: 20px;">Выберите вопрос или напишите свой логин/email</p>
+    
+    <div id="chatMessages" style="background: #f8f9fa; border-radius: 15px; padding: 15px; height: 400px; overflow-y: auto; margin-bottom: 20px;">
+        <div style="margin-bottom: 10px; display: flex; justify-content: flex-start;">
+            <div style="background: #e0e0e0; padding: 10px 15px; border-radius: 18px; max-width: 80%;">
+                👋 Здравствуйте! Чем могу помочь? Выберите тему вопроса или напишите свой логин/email, чтобы узнать пароль.
+            </div>
+        </div>
+    </div>
+    
+    <div id="questionsBlock">
+        <button class="chat-btn" data-question="forgot">🔑 Забыли пароль</button>
+        <button class="chat-btn" data-question="tech">💻 Технические вопросы</button>
+        <button class="chat-btn" data-question="course">📚 Проблемы с курсами</button>
+        <button class="chat-btn" data-question="other">❓ Другое</button>
+    </div>
+    
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <input type="text" id="userInput" placeholder="Или введите логин или email..." style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #ddd; font-size: 1rem;">
+        <button id="sendBtn" class="btn" style="width: auto; padding: 12px 24px;">Отправить</button>
+    </div>
+    
+    <div id="adminBlock" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; display: none;">
+        <h3 style="color: #667eea;">🔐 Админ-панель чата</h3>
+        <p style="color: #666; font-size: 0.9rem;">Только для администратора</p>
+        
+        <div style="margin-bottom: 15px;">
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <input type="text" id="adminMessageInput" placeholder="Сообщение от имени бота..." style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #ddd;">
+                <button id="adminSendMessageBtn" class="btn" style="width: auto; padding: 10px 20px; background: #4caf50;">📤 Отправить</button>
+            </div>
+        </div>
+        
+        <div style="border-top: 1px solid #eee; margin: 15px 0; padding-top: 15px;">
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <input type="text" id="adminSearchLogin" placeholder="Логин пользователя для поиска пароля" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #ddd;">
+                <button id="adminFindUserBtn" class="btn" style="width: auto; padding: 10px 20px;">🔍 Найти</button>
+            </div>
+            <div id="adminResult" style="display: none; margin-top: 15px; padding: 15px; background: #f0f0ff; border-radius: 10px;">
+                <div id="adminResultText"></div>
+                <button id="adminSendPasswordBtn" class="btn" style="margin-top: 10px; background: #4caf50;">📤 Отправить пароль в чат</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="answerBlock" style="display: none; margin-top: 20px;">
+        <div id="answerText" style="background: #e8f5e9; padding: 15px; border-radius: 15px; margin-bottom: 15px;"></div>
+        <button id="newQuestionBtn" class="btn" style="background: #667eea;">← Задать другой вопрос</button>
+    </div>
+</div>
+
+<style>
+    .chat-btn {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 1rem;
+        margin: 8px;
+        transition: 0.2s;
+    }
+    .chat-btn:hover {
+        transform: scale(1.02);
+    }
+    .admin-message {
+        background: #ff9800;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 18px;
+        max-width: 80%;
+        margin-bottom: 10px;
+    }
+</style>
+
+<script>
+    const answers = {
+        'forgot': {
+            'text': '🔑 Чтобы узнать пароль:\n\nНапишите в чат свой логин или email, и бот отправит вам пароль.\n\nИли нажмите кнопку ниже:',
+            'action': '<div style="margin-top: 10px;"><input type="text" id="quickLogin" placeholder="Введите логин или email" style="padding: 8px; border-radius: 8px; border: 1px solid #ddd; width: 70%;"><button id="quickFindBtn" class="btn" style="margin-left: 10px; padding: 8px 16px;">Найти пароль</button></div>'
+        },
+        'tech': {
+            'text': '💻 По техническим вопросам:\n\n• Обратитесь в IT-отдел: it@company.ru\n• Телефон: +7 (495) 123-45-67 (доб. 101)\n• Чат поддержки в Telegram: @it_support',
+            'action': ''
+        },
+        'course': {
+            'text': '📚 По вопросам курсов:\n\n• Свяжитесь с HR-отделом: hr@company.ru\n• Напишите наставнику в корпоративном мессенджере\n• Телефон: +7 (495) 123-45-67 (доб. 205)',
+            'action': ''
+        },
+        'other': {
+            'text': '❓ По другим вопросам:\n\n• Общий email: info@company.ru\n• Телефон горячей линии: +7 (495) 123-45-67\n• Режим работы: Пн-Пт 9:00-18:00',
+            'action': ''
+        }
+    };
+    
+    let foundPassword = null;
+    let foundUsername = null;
+    
+    const chatMessages = document.getElementById('chatMessages');
+    const questionsBlock = document.getElementById('questionsBlock');
+    const answerBlock = document.getElementById('answerBlock');
+    const answerText = document.getElementById('answerText');
+    const newQuestionBtn = document.getElementById('newQuestionBtn');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    
+    function addUserMessage(text) {
+        const msgDiv = document.createElement('div');
+        msgDiv.style.marginBottom = '10px';
+        msgDiv.style.display = 'flex';
+        msgDiv.style.justifyContent = 'flex-end';
+        msgDiv.innerHTML = `<div style="background: #667eea; color: white; padding: 10px 15px; border-radius: 18px; max-width: 80%;">👤 ${escapeHtml(text)}</div>`;
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    function addBotMessage(text, actionHtml = '') {
+        const msgDiv = document.createElement('div');
+        msgDiv.style.marginBottom = '10px';
+        msgDiv.style.display = 'flex';
+        msgDiv.style.justifyContent = 'flex-start';
+        msgDiv.innerHTML = `<div style="background: #e0e0e0; padding: 10px 15px; border-radius: 18px; max-width: 80%;">🤖 ${text.replace(/\n/g, '<br>')}${actionHtml}</div>`;
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        if (actionHtml && document.getElementById('quickFindBtn')) {
+            document.getElementById('quickFindBtn').onclick = () => {
+                const login = document.getElementById('quickLogin').value.trim();
+                if (login) {
+                    findAndSendPassword(login);
+                }
+            };
+        }
+    }
+    
+    function addAdminMessage(text) {
+        const msgDiv = document.createElement('div');
+        msgDiv.style.marginBottom = '10px';
+        msgDiv.style.display = 'flex';
+        msgDiv.style.justifyContent = 'flex-start';
+        msgDiv.innerHTML = `<div style="background: #ff9800; color: white; padding: 10px 15px; border-radius: 18px; max-width: 80%;">👑 АДМИН: ${escapeHtml(text)}</div>`;
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    async function findAndSendPassword(loginOrEmail) {
+        addUserMessage(loginOrEmail);
+        
+        try {
+            const response = await fetch('/api/get-user-password/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ 
+                    login: loginOrEmail,
+                    email: loginOrEmail
+                })
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                addBotMessage(`Нашёл пользователя "${data.username}"! Ваш пароль: <strong style="font-size: 1.2rem;">${data.password}</strong><br><br>⚠️ Запишите его в надежном месте.`);
+            } else {
+                addBotMessage(`Извините, не могу найти пользователя с таким логином или email. Ошибка: ${data.error}`);
+            }
+        } catch (error) {
+            addBotMessage(`Ошибка соединения. Попробуйте позже.`);
+        }
+    }
+    
+    sendBtn.onclick = async () => {
+        const message = userInput.value.trim();
+        if (!message) return;
+        await findAndSendPassword(message);
+        userInput.value = '';
+    };
+    
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendBtn.click();
+        }
+    });
+    
+    document.querySelectorAll('.chat-btn').forEach(btn => {
+        btn.onclick = () => {
+            const question = btn.dataset.question;
+            const answer = answers[question];
+            
+            addUserMessage(btn.textContent);
+            addBotMessage(answer.text, answer.action);
+            
+            questionsBlock.style.display = 'none';
+            answerBlock.style.display = 'block';
+        };
+    });
+    
+    newQuestionBtn.onclick = () => {
+        questionsBlock.style.display = 'block';
+        answerBlock.style.display = 'none';
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    };
+    
+    // Админ-панель
+    {% if user.is_superuser %}
+        document.getElementById('adminBlock').style.display = 'block';
+        
+        const adminMessageInput = document.getElementById('adminMessageInput');
+        const adminSendMessageBtn = document.getElementById('adminSendMessageBtn');
+        const adminSearchLogin = document.getElementById('adminSearchLogin');
+        const adminFindUserBtn = document.getElementById('adminFindUserBtn');
+        const adminResult = document.getElementById('adminResult');
+        const adminResultText = document.getElementById('adminResultText');
+        const adminSendPasswordBtn = document.getElementById('adminSendPasswordBtn');
+        
+        // Отправка сообщения от имени бота
+        adminSendMessageBtn.onclick = () => {
+            const message = adminMessageInput.value.trim();
+            if (!message) {
+                alert('Введите сообщение');
+                return;
+            }
+            addAdminMessage(message);
+            adminMessageInput.value = '';
+        };
+        
+        adminMessageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                adminSendMessageBtn.click();
+            }
+        });
+        
+        // Поиск пользователя
+        adminFindUserBtn.onclick = async () => {
+            const login = adminSearchLogin.value.trim();
+            if (!login) {
+                alert('Введите логин пользователя');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/get-user-password/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ login: login, email: login })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    foundPassword = data.password;
+                    foundUsername = data.username;
+                    adminResultText.innerHTML = `
+                        ✅ Пользователь найден!<br>
+                        <strong>Логин:</strong> ${data.username}<br>
+                        <strong>Email:</strong> ${data.email}<br>
+                        <strong>Пароль:</strong> ${data.password}
+                    `;
+                    adminResult.style.display = 'block';
+                } else {
+                    adminResultText.innerHTML = `❌ ${data.error}`;
+                    adminResult.style.display = 'block';
+                    foundPassword = null;
+                }
+            } catch (error) {
+                adminResultText.innerHTML = `❌ Ошибка соединения`;
+                adminResult.style.display = 'block';
+            }
+        };
+        
+        // Отправка пароля в чат
+        adminSendPasswordBtn.onclick = () => {
+            if (foundPassword) {
+                addAdminMessage(`Пароль пользователя "${foundUsername}": ${foundPassword}`);
+                adminResult.style.display = 'none';
+                adminSearchLogin.value = '';
+                foundPassword = null;
+                alert('Пароль отправлен в чат!');
+            }
+        };
+    {% endif %}
+</script>
+{% endblock %}

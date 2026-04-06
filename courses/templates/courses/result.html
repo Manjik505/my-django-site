@@ -1,0 +1,20 @@
+{% extends 'courses/base.html' %}
+
+{% block content %}
+<div class="card" style="text-align: center;">
+    <h2>📊 Результат теста</h2>
+    <div class="result-score">{{ score }}%</div>
+    <div style="font-size: 1.2rem; margin: 15px 0;">
+        {% if score >= 80 %}🎉 Отлично! Вы отлично усвоили материал!
+        {% elif score >= 60 %}👍 Хороший результат! Есть что подтянуть.
+        {% else %}📚 Стоит повторить материал. Обратитесь к наставнику.{% endif %}
+    </div>
+    <div>Правильно: {{ correct }} из {{ total }}</div>
+    <div class="flex-btns">
+        <a href="/course/{{ course.id }}/" class="btn">📖 Повторить теорию</a>
+        <a href="/course/{{ course.id }}/test/" class="btn">🔄 Пройти заново</a>
+        <a href="/courses/" class="btn">📚 К курсам</a>
+        <a href="/profile/" class="btn">👤 В профиль</a>
+    </div>
+</div>
+{% endblock %}

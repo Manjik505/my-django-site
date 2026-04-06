@@ -1,0 +1,81 @@
+{% extends 'courses/base.html' %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="card">
+    <div class="filters">
+        <a href="?filter=all&category={{ current_category }}" class="filter-btn {% if current_filter == 'all' %}active{% endif %}">Все</a>
+        <a href="?filter=completed&category={{ current_category }}" class="filter-btn {% if current_filter == 'completed' %}active{% endif %}">✅ Пройденные</a>
+        <a href="?filter=in-progress&category={{ current_category }}" class="filter-btn {% if current_filter == 'in-progress' %}active{% endif %}">🔄 В процессе</a>
+        <a href="?filter=not-started&category={{ current_category }}" class="filter-btn {% if current_filter == 'not-started' %}active{% endif %}">📝 Не начатые</a>
+        
+        <select id="categoryFilter" class="category-filter">
+            <option value="all">Все категории</option>
+            {% for code, name in categories %}
+                <option value="{{ code }}" {% if current_category == code %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+        </select>
+        
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Поиск курсов..." value="{{ search_query|default:'' }}">
+    </div>
+</div>
+
+{% for course in courses %}
+<div class="course-item" onclick="window.location.href='/course/{{ course.id }}/'">
+    <div class="course-header">
+        <div>
+            <span style="font-size: 1.8rem;">{{ course.icon }}</span>
+            <strong style="font-size: 1.2rem; margin-left: 10px;">{{ course.title }}</strong>
+        </div>
+        <div>
+            <span class="course-category">{{ course.get_category_display }}</span>
+            {% with progress=progress_dict|get_item:course.id %}
+                {% if progress.completed %}
+                    <span class="status-badge completed">✅ Пройден</span>
+                {% elif progress.in_progress %}
+                    <span class="status-badge in-progress">🔄 В процессе</span>
+                {% else %}
+                    <span class="status-badge not-started">📝 Не начат</span>
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+    <p>{{ course.description }}</p>
+    <div style="color: #667eea;">📋 {{ course.questions.count }} вопросов</div>
+</div>
+{% empty %}
+<div class="card" style="text-align: center;">📭 Курсы не найдены</div>
+{% endfor %}
+
+<script>
+    (function() {
+        const categoryFilter = document.getElementById('categoryFilter');
+        if (categoryFilter) {
+            categoryFilter.onchange = function() {
+                const url = new URL(window.location.href);
+                url.searchParams.set('category', this.value);
+                url.searchParams.delete('search');
+                window.location.href = url.toString();
+            };
+        }
+        
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            let timeoutId;
+            searchInput.oninput = function(e) {
+                clearTimeout(timeoutId);
+                const value = e.target.value;
+                timeoutId = setTimeout(() => {
+                    const url = new URL(window.location.href);
+                    if (value && value.trim() !== '') {
+                        url.searchParams.set('search', value);
+                    } else {
+                        url.searchParams.delete('search');
+                    }
+                    window.location.href = url.toString();
+                }, 500);
+            };
+        }
+    })();
+</script>
+{% endblock %}

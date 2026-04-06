@@ -1,0 +1,48 @@
+{% extends 'courses/base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 400px; margin: 0 auto;">
+    <h2 style="text-align: center; color: #667eea;">🔐 Вход в систему</h2>
+    
+    <form method="post" style="margin-top: 25px;">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">Имя пользователя</label>
+            <input type="text" name="username" autocomplete="off" class="form-control" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;" placeholder="Введите имя пользователя">
+        </div>
+        
+        <div style="margin-bottom: 25px;">
+            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">Пароль</label>
+            <input type="password" name="password" autocomplete="off" class="form-control" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;" placeholder="Введите пароль">
+        </div>
+        
+        {% if form.errors %}
+            <div style="background: #ffebee; padding: 12px; border-radius: 10px; margin-bottom: 20px; color: #f44336; text-align: center;">
+                ⚠️ Неверное имя пользователя или пароль
+            </div>
+        {% endif %}
+        
+        <button type="submit" class="btn" style="width: 100%; padding: 12px; font-size: 16px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 10px; cursor: pointer;">
+            🔓 Войти
+        </button>
+    </form>
+    
+    <div style="text-align: center; margin-top: 15px;">
+        <a href="/forgot-password/" style="color: #667eea; text-decoration: none; font-size: 0.9rem;">🔑 Забыли пароль?</a>
+    </div>
+    
+    <p style="text-align: center; margin-top: 15px; color: #666;">
+        Нет аккаунта? 
+        <a href="/register/" style="color: #667eea; text-decoration: none; font-weight: 500;">Зарегистрироваться</a>
+    </p>
+</div>
+
+<style>
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+</style>
+{% endblock %}

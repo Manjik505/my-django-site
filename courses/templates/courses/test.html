@@ -1,0 +1,78 @@
+{% extends 'courses/base.html' %}
+
+{% block content %}
+<div class="card" id="testContainer">
+    <h2>{{ course.title }}</h2>
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div id="questionCounter" style="margin: 10px 0;"></div>
+    <div id="questionArea"></div>
+</div>
+
+<script>
+    const questions = {{ questions_json|safe }};
+    let currentIndex = 0;
+    let answers = new Array(questions.length).fill(null);
+    
+    function showQuestion() {
+        const q = questions[currentIndex];
+        const progress = (currentIndex / questions.length) * 100;
+        document.getElementById('progressFill').style.width = progress + '%';
+        document.getElementById('questionCounter').innerHTML = `Вопрос ${currentIndex+1} из ${questions.length}`;
+        
+        let optionsHtml = '';
+        for (let i = 0; i < q.options.length; i++) {
+            const selected = answers[currentIndex] === i ? 'selected' : '';
+            optionsHtml += `<div class="option ${selected}" onclick="selectAnswer(${i})">${q.options[i]}</div>`;
+        }
+        
+        document.getElementById('questionArea').innerHTML = `
+            <div style="margin-top: 15px;">
+                <strong style="font-size: 1.2rem;">${q.text}</strong>
+                ${optionsHtml}
+                <button class="btn" style="width: 100%; margin-top: 20px;" onclick="nextQuestion()">${currentIndex === questions.length-1 ? 'Завершить' : 'Далее →'}</button>
+            </div>
+        `;
+    }
+    
+    function selectAnswer(idx) {
+        answers[currentIndex] = idx;
+        showQuestion();
+    }
+    
+    function nextQuestion() {
+        if (answers[currentIndex] === null) {
+            alert('Выберите ответ');
+            return;
+        }
+        if (currentIndex === questions.length - 1) {
+            finishTest();
+        } else {
+            currentIndex++;
+            showQuestion();
+        }
+    }
+    
+    function finishTest() {
+        let correct = 0;
+        for (let i = 0; i < questions.length; i++) {
+            if (answers[i] === questions[i].correct - 1) correct++;
+        }
+        const percent = Math.round((correct / questions.length) * 100);
+        
+        fetch('/finish-test/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ answers: answers, score: percent, correct: correct })
+        }).then(() => {
+            window.location.href = '/finish-test/';
+        });
+    }
+    
+    showQuestion();
+</script>
+{% endblock %}
