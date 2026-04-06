@@ -1,21 +1,24 @@
 import os
 import django
 
-
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'adaptation_project.settings')
 django.setup()
 
 from django.contrib.auth.models import User
 
+# Создаём админа
+username = "admin"
+password = "admin"
+email = "admin@example.com"
 
-USERNAME = "admin"       
-EMAIL = "admin@example.com"   
-PASSWORD = "admin"   
-
-
-
-if not User.objects.filter(username=USERNAME).exists():
-    User.objects.create_superuser(USERNAME, EMAIL, PASSWORD)
-    print(f"✅ Суперпользователь '{USERNAME}' создан!")
+if not User.objects.filter(username=username).exists():
+    User.objects.create_superuser(username, email, password)
+    print(f"✅ Админ {username} создан!")
 else:
-    print(f"⚠️ Пользователь '{USERNAME}' уже существует.")
+    print(f"⚠️ Админ {username} уже есть, пробуем войти")
+    
+    # Сбрасываем пароль, если админ уже есть
+    user = User.objects.get(username=username)
+    user.set_password(password)
+    user.save()
+    print(f"✅ Пароль для {username} обновлён!")
