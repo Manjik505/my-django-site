@@ -6,19 +6,16 @@ django.setup()
 
 from django.contrib.auth.models import User
 
-# Создаём админа
+# Удаляем старого пользователя если есть
+User.objects.filter(username="admin").delete()
+User.objects.filter(username="admin").delete()
+User.objects.filter(username="newadmin").delete()
+
+# Создаём нового админа
 username = "admin"
 password = "admin"
 email = "admin@example.com"
 
-if not User.objects.filter(username=username).exists():
-    User.objects.create_superuser(username, email, password)
-    print(f"✅ Админ {username} создан!")
-else:
-    print(f"⚠️ Админ {username} уже есть, пробуем войти")
-    
-    # Сбрасываем пароль, если админ уже есть
-    user = User.objects.get(username=username)
-    user.set_password(password)
-    user.save()
-    print(f"✅ Пароль для {username} обновлён!")
+user = User.objects.create_superuser(username, email, password)
+print(f"✅ Суперпользователь '{username}' создан!")
+print(f"🔐 Пароль: {password}")
