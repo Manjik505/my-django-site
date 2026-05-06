@@ -4,10 +4,11 @@ from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.db.models import Avg, Max
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from .models import Course, Question, Result, UserProgress, Profile
 from django.contrib.auth.models import User
 import json
+from django.core import serializers
 
 def register(request):
     if request.method == 'POST':
@@ -416,11 +417,8 @@ def api_get_user_password(request):
             return JsonResponse({'success': False, 'error': str(e)})
     
     return JsonResponse({'success': False, 'error': 'Метод не поддерживается'})
-    from django.core import serializers
-from django.http import HttpResponse
-from django.contrib.auth.models import User
-from .models import Course, Question, Result, UserProgress, Profile
 
+# ============ ЭКСПОРТ БАЗЫ ДАННЫХ ============
 def export_full_database(request):
     if not request.user.is_superuser:
         return HttpResponse("Доступ запрещен", status=403)
