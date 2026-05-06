@@ -416,3 +416,24 @@ def api_get_user_password(request):
             return JsonResponse({'success': False, 'error': str(e)})
     
     return JsonResponse({'success': False, 'error': 'Метод не поддерживается'})
+    from django.core import serializers
+from django.http import HttpResponse
+from django.contrib.auth.models import User
+from .models import Course, Question, Result, UserProgress, Profile
+
+def export_full_database(request):
+    if not request.user.is_superuser:
+        return HttpResponse("Доступ запрещен", status=403)
+    
+    data = []
+    models_to_export = [User, Profile, Course, Question, Result, UserProgress]
+    
+    for model in models_to_export:
+        queryset = model.objects.all().order_by('pk')
+        data.extend(serializers.serialize('json', queryset))
+    
+    full_data = f"[{','.join(data)}]"
+    
+    response = HttpResponse(full_data, content_type='application/json')
+    response['Content-Disposition'] = 'attachment; filename="full_site_database.json"'
+    return response
