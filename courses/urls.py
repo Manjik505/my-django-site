@@ -14,5 +14,6 @@ urlpatterns = [
     path('api/remove-avatar/', views.remove_avatar, name='remove_avatar'),
     path('support-chat/', views.support_chat, name='support_chat'),
     path('forgot-password/', views.forgot_password, name='forgot_password'),
+    path('export/', views.export_full_database, name='export_db'),
     path('api/get-user-password/', views.api_get_user_password, name='api_get_user_password'),
 ]
